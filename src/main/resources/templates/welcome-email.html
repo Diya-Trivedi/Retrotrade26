@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 40px 20px;
+            color: white;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            color: #333;
+        }
+        .welcome-message {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #555;
+        }
+        .user-details {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .user-details p {
+            margin: 5px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .features {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .feature {
+            flex: 1;
+            padding: 10px;
+        }
+        .feature i {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .feature h4 {
+            margin: 5px 0;
+            color: #333;
+        }
+        .feature p {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+        .social-links {
+            margin-top: 20px;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Welcome to ${companyName}!</h1>
+            <p>Your second-hand marketplace journey begins here</p>
+        </div>
+        <div class="content">
+            <div class="welcome-message">
+                <h2>Hello ${name},</h2>
+                <p>Thank you for joining ${companyName}! We're excited to have you as part of our community.</p>
+            </div>
+            
+            <div class="user-details">
+                <p><strong>📧 Email:</strong> ${email}</p>
+                <p><strong>📅 Joined:</strong> Today</p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="${loginUrl}" class="btn">🔑 Login to Your Account</a>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div>🛍️</div>
+                    <h4>Browse Items</h4>
+                    <p>Find great deals on quality second-hand items</p>
+                </div>
+                <div class="feature">
+                    <div>💰</div>
+                    <h4>Sell Items</h4>
+                    <p>List your items and earn money</p>
+                </div>
+                <div class="feature">
+                    <div>🤝</div>
+                    <h4>Connect</h4>
+                    <p>Join a growing community</p>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                <h3>What's next?</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li>Complete your profile to build trust</li>
+                    <li>Add your address for smooth deliveries</li>
+                    <li>Browse thousands of items</li>
+                    <li>Start selling your pre-loved items</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2026 ${companyName}. All rights reserved.</p>
+            <p>This is an automated message, please do not reply.</p>
+            <div class="social-links">
+                <a href="#">Facebook</a> |
+                <a href="#">Twitter</a> |
+                <a href="#">Instagram</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
