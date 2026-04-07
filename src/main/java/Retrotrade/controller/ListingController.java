@@ -1,9 +1,12 @@
 package Retrotrade.controller;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,14 +21,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 import Retrotrade.entity.CategoryEntity;
 import Retrotrade.entity.ListingEntity;
+import Retrotrade.entity.ListingImageEntity;
 import Retrotrade.entity.OfferEntity;
 import Retrotrade.entity.SubCategoryEntity;
 import Retrotrade.entity.UserEntity;
 import Retrotrade.repository.CategoryRepository;
+import Retrotrade.repository.ListingImageRepository;
 import Retrotrade.repository.ListingRepository;
 import Retrotrade.repository.OfferRepository;
 import Retrotrade.repository.SubCategoryRepository;
@@ -46,6 +55,12 @@ public class ListingController {
     
     @Autowired
     private OfferRepository offerRepository;
+    
+    @Autowired
+    private ListingImageRepository listingImageRepository;
+    
+    @Autowired
+    private Cloudinary cloudinary;
     
     // ==================== PUBLIC LISTINGS PAGE ====================
     
@@ -187,7 +202,7 @@ public class ListingController {
             return "redirect:/login";
         }
         
-        Optional<ListingEntity> listingOpt = listingRepository.findById(id);
+        Optional<ListingEntity> listingOpt = listingRepository.findListingWithImages(id);
         if (listingOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Listing not found!");
             return "redirect:/listings/my-listings";
@@ -209,26 +224,32 @@ public class ListingController {
         
         // Get categories and subcategories for dropdown
         List<CategoryEntity> categories = categoryRepository.findByActiveTrue();
+        List<SubCategoryEntity> subcategories = subCategoryRepository.findByActiveTrue();
+        List<ListingImageEntity> existingImages = listingImageRepository.findByListingListingId(id);
+        
         model.addAttribute("categories", categories);
-        model.addAttribute("subcategories", subCategoryRepository.findByActiveTrue());
+        model.addAttribute("subcategories", subcategories);
         model.addAttribute("listing", listing);
+        model.addAttribute("existingImages", existingImages);
         
         return "listings/edit";
     }
     
-    // ==================== UPDATE LISTING ====================
+    // ==================== UPDATE LISTING (FLEXIBLE) ====================
     
     @PostMapping("/update/{id}")
     public String updateListing(@PathVariable Integer id,
-                                @RequestParam("listingName") String listingName,
-                                @RequestParam("description") String description,
-                                @RequestParam(value = "brand", required = false) String brand,
-                                @RequestParam("price") BigDecimal price,
-                                @RequestParam("categoryId") Integer categoryId,
-                                @RequestParam("subCategoryId") Integer subCategoryId,
-                                @RequestParam("condition") String condition,
-                                @RequestParam("location") String location,
-                                @RequestParam(value = "negotiable", required = false) Boolean negotiable,
+                                @RequestParam(required = false) String listingName,
+                                @RequestParam(required = false) String description,
+                                @RequestParam(required = false) String brand,
+                                @RequestParam(required = false) BigDecimal price,
+                                @RequestParam(required = false) Integer categoryId,
+                                @RequestParam(required = false) Integer subCategoryId,
+                                @RequestParam(required = false) String condition,
+                                @RequestParam(required = false) String location,
+                                @RequestParam(required = false) Boolean negotiable,
+                                @RequestParam(required = false) List<Integer> imagesToDelete,
+                                @RequestParam(required = false) List<MultipartFile> newImages,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
 
@@ -245,6 +266,8 @@ public class ListingController {
         }
 
         ListingEntity listing = listingOpt.get();
+        
+        // Verify ownership
         if (!listing.getSeller().getUserId().equals(currentUser.getUserId())) {
             redirectAttributes.addFlashAttribute("error", "You can only edit your own listings!");
             return "redirect:/listings/my-listings";
@@ -256,27 +279,177 @@ public class ListingController {
             return "redirect:/listings/my-listings";
         }
 
-        // Update fields
-        listing.setListingName(listingName);
-        listing.setDescription(description);
-        listing.setBrand(brand);
-        listing.setPrice(price);
-        listing.setCondition(ListingEntity.Condition.valueOf(condition));
-        listing.setLocation(location);
-        listing.setNegotiable(negotiable != null && negotiable);
-
-        // Update category and subcategory
-        CategoryEntity category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        SubCategoryEntity subCategory = subCategoryRepository.findById(subCategoryId)
-                .orElseThrow(() -> new RuntimeException("Subcategory not found"));
-        listing.setCategory(category);
-        listing.setSubCategory(subCategory);
-
+        // ==================== UPDATE BASIC FIELDS (Only if provided) ====================
+        
+        if (listingName != null && !listingName.trim().isEmpty()) {
+            listing.setListingName(listingName);
+        }
+        
+        if (description != null && !description.trim().isEmpty()) {
+            listing.setDescription(description);
+        }
+        
+        if (brand != null) {
+            listing.setBrand(brand);
+        }
+        
+        if (price != null && price.compareTo(BigDecimal.ZERO) > 0) {
+            listing.setPrice(price);
+        }
+        
+        if (location != null && !location.trim().isEmpty()) {
+            listing.setLocation(location);
+        }
+        
+        if (negotiable != null) {
+            listing.setNegotiable(negotiable);
+        }
+        
+        // ==================== UPDATE CONDITION (Only if provided) ====================
+        
+        if (condition != null && !condition.isEmpty()) {
+            try {
+                listing.setCondition(ListingEntity.Condition.valueOf(condition));
+            } catch (IllegalArgumentException e) {
+                // Invalid condition, keep current
+            }
+        }
+        
+        // ==================== UPDATE CATEGORY & SUBCATEGORY (Only if provided) ====================
+        
+        if (categoryId != null && categoryId > 0) {
+            Optional<CategoryEntity> categoryOpt = categoryRepository.findById(categoryId);
+            if (categoryOpt.isPresent()) {
+                listing.setCategory(categoryOpt.get());
+            }
+        }
+        
+        if (subCategoryId != null && subCategoryId > 0) {
+            Optional<SubCategoryEntity> subCategoryOpt = subCategoryRepository.findById(subCategoryId);
+            if (subCategoryOpt.isPresent()) {
+                listing.setSubCategory(subCategoryOpt.get());
+            }
+        }
+        
+        // ==================== DELETE IMAGES (Only if requested) ====================
+        
+        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+            for (Integer imageId : imagesToDelete) {
+                Optional<ListingImageEntity> imageOpt = listingImageRepository.findById(imageId);
+                if (imageOpt.isPresent()) {
+                    ListingImageEntity image = imageOpt.get();
+                    if (image.getListing().getListingId().equals(id)) {
+                        listingImageRepository.delete(image);
+                    }
+                }
+            }
+            
+            // After deletion, ensure there's still a primary image
+            boolean hasPrimary = listingImageRepository.existsByListingListingIdAndIsPrimaryTrue(id);
+            if (!hasPrimary) {
+                List<ListingImageEntity> remainingImages = listingImageRepository.findByListingListingId(id);
+                if (!remainingImages.isEmpty()) {
+                    remainingImages.get(0).setIsPrimary(true);
+                    listingImageRepository.save(remainingImages.get(0));
+                }
+            }
+        }
+        
+        // ==================== ADD NEW IMAGES (Only if uploaded) ====================
+        
+        if (newImages != null && !newImages.isEmpty()) {
+            int currentImageCount = (int) listingImageRepository.countByListingListingId(id);
+            int maxImages = 5;
+            
+            // Filter out empty files
+            List<MultipartFile> validImages = newImages.stream()
+                    .filter(img -> img != null && !img.isEmpty())
+                    .collect(Collectors.toList());
+            
+            for (MultipartFile image : validImages) {
+                if (currentImageCount >= maxImages) {
+                    redirectAttributes.addFlashAttribute("warning", "Maximum 5 images reached. Additional images were not uploaded.");
+                    break;
+                }
+                
+                try {
+                    Map<?, ?> uploadResult = cloudinary.uploader().upload(image.getBytes(),
+                        ObjectUtils.asMap(
+                            "folder", "retrotrade/listings",
+                            "public_id", "listing_" + listing.getListingId() + "_" + System.currentTimeMillis(),
+                            "resource_type", "auto"
+                        ));
+                    
+                    String imageUrl = uploadResult.get("url").toString();
+                    
+                    ListingImageEntity imageEntity = new ListingImageEntity();
+                    imageEntity.setImageUrl(imageUrl);
+                    // Set as primary only if this is the first image (no existing images)
+                    imageEntity.setIsPrimary(currentImageCount == 0);
+                    imageEntity.setListing(listing);
+                    
+                    listingImageRepository.save(imageEntity);
+                    currentImageCount++;
+                    
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    redirectAttributes.addFlashAttribute("warning", "Some images could not be uploaded.");
+                }
+            }
+        }
+        
+        // ==================== FINAL VALIDATION ====================
+        
+        // Ensure at least one image exists after all operations
+        long finalImageCount = listingImageRepository.countByListingListingId(id);
+        if (finalImageCount == 0) {
+            redirectAttributes.addFlashAttribute("error", "Listing must have at least one image! Please keep at least one image.");
+            return "redirect:/listings/edit/" + id;
+        }
+        
+        // Save the updated listing
         listingRepository.save(listing);
-
+        
         redirectAttributes.addFlashAttribute("success", "Listing updated successfully!");
         return "redirect:/listings/my-listings";
+    }
+    
+    // ==================== SET PRIMARY IMAGE ====================
+    
+    @GetMapping("/set-primary-image/{imageId}")
+    public String setPrimaryImage(@PathVariable Integer imageId,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
+        
+        UserEntity currentUser = (UserEntity) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        
+        Optional<ListingImageEntity> imageOpt = listingImageRepository.findById(imageId);
+        if (imageOpt.isPresent()) {
+            ListingImageEntity image = imageOpt.get();
+            ListingEntity listing = image.getListing();
+            
+            if (listing.getSeller().getUserId().equals(currentUser.getUserId())) {
+                // Reset all images for this listing to non-primary
+                List<ListingImageEntity> images = listingImageRepository.findByListingListingId(listing.getListingId());
+                for (ListingImageEntity img : images) {
+                    img.setIsPrimary(false);
+                    listingImageRepository.save(img);
+                }
+                
+                // Set this image as primary
+                image.setIsPrimary(true);
+                listingImageRepository.save(image);
+                
+                redirectAttributes.addFlashAttribute("success", "Primary image updated!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "You don't have permission to modify this image!");
+            }
+        }
+        
+        return "redirect:/listings/edit/" + (imageOpt.isPresent() ? imageOpt.get().getListing().getListingId() : "");
     }
     
     // ==================== DELETE LISTING ====================
@@ -306,6 +479,9 @@ public class ListingController {
             return "redirect:/listings/my-listings";
         }
         
+        // Delete associated images first
+        listingImageRepository.deleteByListingListingId(id);
+        
         listingRepository.deleteById(id);
         redirectAttributes.addFlashAttribute("success", "Listing deleted successfully!");
         
@@ -332,7 +508,7 @@ public class ListingController {
         List<ListingEntity> soldListings = listingRepository.findBySellerAndStatus(currentUser, "SOLD");
         List<ListingEntity> pendingListings = listingRepository.findBySellerAndStatus(currentUser, "PENDING");
         
-        // Get recent offers received - FIXED: Use the correct method
+        // Get recent offers received
         List<OfferEntity> recentOffers = offerRepository.findRecentOffersForSeller(
                 currentUser.getUserId(), PageRequest.of(0, 5, Sort.by("createdAt").descending()));
         

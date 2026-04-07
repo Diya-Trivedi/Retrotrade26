@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ... existing styles ... (keep as is) */
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --sidebar-width: 280px;
@@ -380,6 +379,26 @@
             color: white;
         }
         
+        .status-initiated, .status-completed, .status-delivered {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-pending-transaction {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .status-cancelled, .status-refunded {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-disputed {
+            background: #fd7e14;
+            color: white;
+        }
+        
         .quick-stats-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -457,7 +476,7 @@
                 </div>
             </div>
 
-            <!-- Main Statistics Cards (unchanged) -->
+            <!-- Main Statistics Cards -->
             <div class="stats-grid">
                 <!-- Users Stat -->
                 <div class="stat-card">
@@ -524,7 +543,7 @@
                     <div class="stat-icon" style="background: rgba(0, 123, 255, 0.1); color: #007bff;">
                         <i class="fas fa-credit-card"></i>
                     </div>
-                    <div class="stat-value">${fn:length(transactionList)}</div>
+                    <div class="stat-value">${totalTransactions != null ? totalTransactions : fn:length(transactionList)}</div>
                     <div class="stat-label">Transactions</div>
                     <a href="${pageContext.request.contextPath}/admin/transactions" class="stat-link">
                         View <i class="fas fa-arrow-right ms-1"></i>
@@ -568,125 +587,108 @@
                 </div>
             </div>
 
-            <!-- Quick Actions (unchanged) -->
+            <!-- Quick Actions -->
             <div class="section-title">
                 <h4><i class="fas fa-bolt me-2 text-primary"></i>Quick Actions</h4>
             </div>
             
             <div class="quick-actions-grid">
-                <!-- Add Category -->
                 <a href="${pageContext.request.contextPath}/admin/category/add" class="action-card">
                     <i class="fas fa-plus-circle"></i>
                     <h6>Add Category</h6>
                     <small>Create new category</small>
                 </a>
                 
-                <!-- View Categories -->
                 <a href="${pageContext.request.contextPath}/admin/category/list" class="action-card">
                     <i class="fas fa-list"></i>
                     <h6>View Categories</h6>
                     <small>Manage categories</small>
                 </a>
                 
-                <!-- Add Subcategory -->
                 <a href="${pageContext.request.contextPath}/admin/subcategory/add" class="action-card">
                     <i class="fas fa-plus-square"></i>
                     <h6>Add Subcategory</h6>
                     <small>Create new subcategory</small>
                 </a>
                 
-                <!-- View Subcategories -->
                 <a href="${pageContext.request.contextPath}/admin/subcategory/list" class="action-card">
                     <i class="fas fa-sitemap"></i>
                     <h6>View Subcategories</h6>
                     <small>Manage subcategories</small>
                 </a>
                 
-                <!-- View Listings -->
                 <a href="${pageContext.request.contextPath}/admin/listings" class="action-card">
                     <i class="fas fa-box"></i>
                     <h6>All Listings</h6>
                     <small>Manage products</small>
                 </a>
                 
-                <!-- Pending Listings -->
                 <a href="${pageContext.request.contextPath}/admin/listings?status=PENDING" class="action-card">
                     <i class="fas fa-clock"></i>
                     <h6>Pending Listings</h6>
                     <small>Awaiting approval</small>
                 </a>
                 
-                <!-- View Offers -->
                 <a href="${pageContext.request.contextPath}/admin/offers" class="action-card">
                     <i class="fas fa-hand-holding-usd"></i>
                     <h6>All Offers</h6>
                     <small>Manage offers</small>
                 </a>
                 
-                <!-- View Transactions -->
                 <a href="${pageContext.request.contextPath}/admin/transactions" class="action-card">
                     <i class="fas fa-credit-card"></i>
                     <h6>Transactions</h6>
                     <small>View all transactions</small>
                 </a>
                 
-                <!-- Revenue Report -->
                 <a href="${pageContext.request.contextPath}/admin/transactions/revenue" class="action-card">
                     <i class="fas fa-chart-line"></i>
                     <h6>Revenue Report</h6>
                     <small>Analytics</small>
                 </a>
                 
-                <!-- View Users -->
                 <a href="${pageContext.request.contextPath}/listUser" class="action-card">
                     <i class="fas fa-users"></i>
                     <h6>Manage Users</h6>
                     <small>View all users</small>
                 </a>
 
-                <!-- Manage Reports -->
                 <a href="${pageContext.request.contextPath}/admin/reports" class="action-card">
                     <i class="fas fa-flag"></i>
                     <h6>Manage Reports</h6>
                     <small>Handle user reports</small>
                 </a>
                 
-                <!-- Admin Profile (Placeholder) -->
                 <a href="#" class="action-card">
                     <i class="fas fa-user-cog"></i>
                     <h6>Admin Profile</h6>
                     <small>Your account</small>
                 </a>
                 
-                <!-- System Settings (Placeholder) -->
                 <a href="#" class="action-card">
                     <i class="fas fa-cog"></i>
                     <h6>Settings</h6>
                     <small>System settings</small>
                 </a>
                 
-                <!-- Reports (Placeholder - Future Feature) -->
                 <a href="#" class="action-card">
                     <i class="fas fa-file-alt"></i>
                     <h6>Reports</h6>
                     <small>Generate reports</small>
                 </a>
                 
-                <!-- Backup (Placeholder - Future Feature) -->
                 <a href="#" class="action-card">
                     <i class="fas fa-database"></i>
                     <h6>Backup</h6>
                     <small>System backup</small>
                 </a>
                 
-                <!-- Audit Logs (Placeholder - Future Feature) -->
                 <a href="#" class="action-card">
                     <i class="fas fa-history"></i>
                     <h6>Audit Logs</h6>
                     <small>Activity tracking</small>
                 </a>
                 
-                <!-- Support (Placeholder - Future Feature) -->
                 <a href="#" class="action-card">
                     <i class="fas fa-headset"></i>
                     <h6>Support</h6>
@@ -713,7 +715,7 @@
                 </div>
             </div>
 
-            <!-- Recent Listings (unchanged) -->
+            <!-- Recent Listings -->
             <div class="section-title">
                 <h4><i class="fas fa-clock me-2 text-primary"></i>Recent Listings</h4>
             </div>
@@ -745,7 +747,7 @@
                 <div class="text-end mt-2"><a href="${pageContext.request.contextPath}/admin/listings" class="btn btn-sm btn-outline-primary">View All Listings <i class="fas fa-arrow-right ms-1"></i></a></div>
             </div>
 
-            <!-- Recent Offers (unchanged) -->
+            <!-- Recent Offers -->
             <div class="section-title">
                 <h4><i class="fas fa-hand-holding-usd me-2 text-primary"></i>Recent Offers</h4>
             </div>
@@ -777,7 +779,40 @@
                 <div class="text-end mt-2"><a href="${pageContext.request.contextPath}/admin/offers" class="btn btn-sm btn-outline-primary">View All Offers <i class="fas fa-arrow-right ms-1"></i></a></div>
             </div>
 
-            <!-- Recent Reports (unchanged) -->
+            <!-- Recent Transactions -->
+            <div class="section-title">
+                <h4><i class="fas fa-credit-card me-2 text-primary"></i>Recent Transactions</h4>
+            </div>
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr><th>ID</th><th>Product</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Payment Mode</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="transaction" items="${recentTransactions}" varStatus="status">
+                                <c:if test="${status.index < 5}">
+                                    <tr>
+                                        <td>#${transaction.transactionId}</td>
+                                        <td>${transaction.listing.listingName}</td>
+                                        <td>${transaction.buyer.firstName} ${transaction.buyer.lastName}</td>
+                                        <td>${transaction.seller.firstName} ${transaction.seller.lastName}</td>
+                                        <td>₹<fmt:formatNumber value="${transaction.finalPrice}" pattern="#,##0.00"/></td>
+                                        <td>${transaction.paymentMode}</td>
+                                        <td><span class="status-badge status-${fn:toLowerCase(transaction.transactionStatus)}">${transaction.transactionStatus}</span></td>
+                                        <td>${transaction.createdAt}</td>
+                                        <td><a href="${pageContext.request.contextPath}/admin/transactions/view/${transaction.transactionId}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a></td>
+                                    </tr>
+                                </c:if>
+                            </c:forEach>
+                            <c:if test="${empty recentTransactions}"><tr><td colspan="9" class="text-center">No recent transactions</td></tr></c:if>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-2"><a href="${pageContext.request.contextPath}/admin/transactions" class="btn btn-sm btn-outline-primary">View All Transactions <i class="fas fa-arrow-right ms-1"></i></a></div>
+            </div>
+
+            <!-- Recent Reports -->
             <div class="section-title">
                 <h4><i class="fas fa-flag me-2 text-primary"></i>Recent Reports</h4>
             </div>
@@ -808,7 +843,7 @@
                 <div class="text-end mt-2"><a href="${pageContext.request.contextPath}/admin/reports" class="btn btn-sm btn-outline-primary">View All Reports <i class="fas fa-arrow-right ms-1"></i></a></div>
             </div>
 
-            <!-- Quick Stats Row - Categories and Users (unchanged) -->
+            <!-- Quick Stats Row - Categories and Users -->
             <div class="row mt-4">
                 <div class="col-md-6">
                     <div class="table-card">
@@ -851,7 +886,7 @@
                                             </tr>
                                         </c:if>
                                     </c:forEach>
-                                    <c:if test="${empty userList}"><tr><td colspan="4" class="text-center">No users found</td></tr></c:if>
+                                    <c:if test="${empty userList}"><td><td colspan="4" class="text-center">No users found</td></c:if>
                                 </tbody>
                             </table>
                         </div>

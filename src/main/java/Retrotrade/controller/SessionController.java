@@ -1,5 +1,6 @@
 package Retrotrade.controller;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +18,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import Retrotrade.entity.CategoryEntity;
 import Retrotrade.entity.ListingEntity;
 import Retrotrade.entity.OfferEntity;
+import Retrotrade.entity.ReportEntity;
 import Retrotrade.entity.SubCategoryEntity;
+import Retrotrade.entity.TransactionEntity;
 import Retrotrade.entity.UserEntity;
 import Retrotrade.repository.CategoryRepository;
 import Retrotrade.repository.ListingRepository;
 import Retrotrade.repository.OfferRepository;
+import Retrotrade.repository.ReportRepository;
 import Retrotrade.repository.SubCategoryRepository;
+import Retrotrade.repository.TransactionRepository;
 import Retrotrade.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -47,6 +52,12 @@ public class SessionController {
     
     @Autowired
     private OfferRepository offerRepository;
+    
+    @Autowired
+    private TransactionRepository transactionRepository;
+    
+    @Autowired
+    private ReportRepository reportRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -73,6 +84,8 @@ public class SessionController {
             List<CategoryEntity> categoryList = categoryRepository.findAll();
             List<ListingEntity> listingList = listingRepository.findAll();
             List<OfferEntity> offerList = offerRepository.findAll();
+            List<TransactionEntity> transactionList = transactionRepository.findAll();
+            List<ReportEntity> reportList = reportRepository.findAll();
             
             // Admin statistics
             long totalUsers = userList.size();
@@ -80,16 +93,49 @@ public class SessionController {
             long totalSubcategories = subCategoryRepository.count();
             long totalListings = listingList.size();
             long totalOffers = offerList.size();
+            long totalTransactions = transactionList.size();
+            long totalReports = reportList.size();
+            
             long activeListings = listingRepository.countByStatus("ACTIVE");
             long pendingListings = listingRepository.countByStatus("PENDING");
             long soldListings = listingRepository.countByStatus("SOLD");
             long rejectedListings = listingRepository.countByStatus("REJECTED");
             
-            // Recent listings
-            List<ListingEntity> recentListings = listingRepository.findTop10ByStatusOrderByCreatedAtDesc("PENDING");
+            // Total platform revenue
+            BigDecimal totalRevenue = transactionRepository.getTotalPlatformFees();
+            if (totalRevenue == null) {
+                totalRevenue = BigDecimal.ZERO;
+            }
+            
+            // Recent listings (show all recent, not just pending)
+            List<ListingEntity> recentListings = listingRepository.findTop10ByStatusOrderByCreatedAtDesc("ACTIVE");
+            if (recentListings.size() < 5) {
+                // Add pending listings if not enough active ones
+                List<ListingEntity> pendingListingsForRecent = listingRepository.findTop10ByStatusOrderByCreatedAtDesc("PENDING");
+                for (ListingEntity pendingListing : pendingListingsForRecent) {
+                    if (recentListings.size() < 10 && !recentListings.contains(pendingListing)) {
+                        recentListings.add(pendingListing);
+                    }
+                }
+            }
             
             // Recent offers
             List<OfferEntity> recentOffers = offerRepository.findTop10ByOrderByCreatedAtDesc();
+            
+            // Recent transactions
+            List<TransactionEntity> recentTransactions = transactionRepository.findAll(
+                org.springframework.data.domain.PageRequest.of(0, 10, 
+                    org.springframework.data.domain.Sort.by("createdAt").descending())
+            ).getContent();
+            
+            // Recent reports
+            List<ReportEntity> recentReports = reportRepository.findAll(
+                org.springframework.data.domain.PageRequest.of(0, 10, 
+                    org.springframework.data.domain.Sort.by("createdAt").descending())
+            ).getContent();
+            
+            // Monthly revenue data for chart
+            List<Object[]> monthlyRevenue = transactionRepository.getMonthlyRevenue();
             
             // Create a map of category names to their listing counts
             Map<Integer, Integer> categoryListingCounts = new HashMap<>();
@@ -105,6 +151,8 @@ public class SessionController {
             model.addAttribute("categoryList", categoryList);
             model.addAttribute("listingList", listingList);
             model.addAttribute("offerList", offerList);
+            model.addAttribute("transactionList", transactionList);
+            model.addAttribute("reportList", reportList);
             model.addAttribute("currentUser", currentUser);
             model.addAttribute("categoryListingCounts", categoryListingCounts);
             
@@ -114,16 +162,27 @@ public class SessionController {
             model.addAttribute("totalSubcategories", totalSubcategories);
             model.addAttribute("totalListings", totalListings);
             model.addAttribute("totalOffers", totalOffers);
+            model.addAttribute("totalTransactions", totalTransactions);
+            model.addAttribute("totalReports", totalReports);
+            model.addAttribute("totalRevenue", totalRevenue);
+            
             model.addAttribute("activeListings", activeListings);
             model.addAttribute("pendingListings", pendingListings);
             model.addAttribute("soldListings", soldListings);
             model.addAttribute("rejectedListings", rejectedListings);
+            
+            // Recent data
             model.addAttribute("recentListings", recentListings);
             model.addAttribute("recentOffers", recentOffers);
+            model.addAttribute("recentTransactions", recentTransactions);
+            model.addAttribute("recentReports", recentReports);
+            
+            // Chart data
+            model.addAttribute("monthlyRevenue", monthlyRevenue);
 
         } catch (Exception e) {
-            logger.error("Error loading admin dashboard: {}", e.getMessage());
-            model.addAttribute("error", "Unable to load dashboard data");
+            logger.error("Error loading admin dashboard: {}", e.getMessage(), e);
+            model.addAttribute("error", "Unable to load dashboard data: " + e.getMessage());
         }
 
         return "admin/dashboard";
@@ -278,7 +337,4 @@ public class SessionController {
         session.invalidate();
         return "redirect:/login?logout=true";
     }
-    
-    @Autowired
-    private Retrotrade.repository.TransactionRepository transactionRepository;
 }
