@@ -383,10 +383,7 @@
     <div class="sales-container">
         <div class="page-header">
             <h2><i class="fas fa-store me-2 text-primary"></i>My Sales</h2>
-            <div class="earnings-badge">
-                <i class="fas fa-rupee-sign me-1"></i>
-                Total Earnings: ₹<fmt:formatNumber value="${totalEarnings}" pattern="#,##0.00"/>
-            </div>
+           
         </div>
         
         <!-- Statistics Cards -->

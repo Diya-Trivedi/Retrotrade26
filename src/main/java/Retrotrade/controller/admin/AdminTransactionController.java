@@ -181,27 +181,4 @@ public class AdminTransactionController {
         return "redirect:/admin/transactions";
     }
     
-    // ==================== REVENUE REPORT ====================
-    
-    @GetMapping("/revenue")
-    public String revenueReport(HttpSession session,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
-        
-        UserEntity currentUser = (UserEntity) session.getAttribute("user");
-        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
-            redirectAttributes.addFlashAttribute("error", "Access denied!");
-            return "redirect:/login";
-        }
-        
-        List<Object[]> monthlyRevenue = transactionRepository.getMonthlyRevenue();
-        List<Object[]> pendingPayouts = transactionRepository.getPendingPayouts();
-        Object[] stats = transactionRepository.getTransactionStatistics();
-        
-        model.addAttribute("monthlyRevenue", monthlyRevenue);
-        model.addAttribute("pendingPayouts", pendingPayouts);
-        model.addAttribute("stats", stats);
-        
-        return "admin/transaction/revenue";
-    }
 }

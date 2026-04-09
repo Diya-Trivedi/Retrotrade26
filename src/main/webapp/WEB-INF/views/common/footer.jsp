@@ -45,7 +45,7 @@
         </div>
         <hr class="bg-secondary">
         <div class="text-center text-muted">
-            <p class="mb-0">&copy; 2024 Retrotrade. All rights reserved. | Version 1.0</p>
+            <p class="mb-0">&copy; 2026 Retrotrade. All rights reserved. | Version 1.0</p>
         </div>
     </div>
 </footer>

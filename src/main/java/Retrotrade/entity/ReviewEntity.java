@@ -20,6 +20,10 @@ public class ReviewEntity {
     @JoinColumn(name = "buyer_id", nullable = false)
     private UserEntity buyer;
 
+    @ManyToOne
+    @JoinColumn(name = "listing_id", nullable = true)  // Allow null if review is not for a specific listing
+    private ListingEntity listing;
+
     @Column(name = "rating", nullable = false)
     private Integer rating; // 1-5
 
@@ -43,18 +47,34 @@ public class ReviewEntity {
         this.rating = rating;
         this.comment = comment;
     }
+    
+    public ReviewEntity(UserEntity seller, UserEntity buyer, ListingEntity listing, Integer rating, String comment) {
+        this.seller = seller;
+        this.buyer = buyer;
+        this.listing = listing;
+        this.rating = rating;
+        this.comment = comment;
+    }
 
     // Getters and Setters
     public Integer getReviewId() { return reviewId; }
     public void setReviewId(Integer reviewId) { this.reviewId = reviewId; }
+    
     public UserEntity getSeller() { return seller; }
     public void setSeller(UserEntity seller) { this.seller = seller; }
+    
     public UserEntity getBuyer() { return buyer; }
     public void setBuyer(UserEntity buyer) { this.buyer = buyer; }
+    
+    public ListingEntity getListing() { return listing; }
+    public void setListing(ListingEntity listing) { this.listing = listing; }
+    
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
+    
     public String getComment() { return comment; }
     public void setComment(String comment) { this.comment = comment; }
+    
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

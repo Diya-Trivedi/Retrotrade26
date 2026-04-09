@@ -387,10 +387,7 @@
                                         <i class="fas fa-star me-1"></i>Write Review
                                     </a>
                                 </c:if>
-                                <c:if test="${transaction.transactionStatus == 'COMPLETED'}">
-                                    <a href="#" class="btn-action btn-track">
-                                        <i class="fas fa-truck me-1"></i>Track Order
-                                    </a>
+                                <c:if test="${transaction.transactionStatus == 'COMPLETED'}">    
                                 </c:if>
                             </div>
                         </div>

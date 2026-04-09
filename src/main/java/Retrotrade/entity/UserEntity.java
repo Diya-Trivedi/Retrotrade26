@@ -50,6 +50,44 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressEntity> addresses = new ArrayList<>();
     
+    // ==================== FIXED REVIEW RELATIONSHIPS ====================
+    
+    // Reviews GIVEN by this user (as buyer)
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewEntity> reviewsGiven = new ArrayList<>();
+    
+    // Reviews RECEIVED by this user (as seller)
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewEntity> reviewsReceived = new ArrayList<>();
+    
+    // Listings sold by this user
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ListingEntity> listings = new ArrayList<>();
+    
+    // Offers made by this user (as buyer)
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OfferEntity> offersMade = new ArrayList<>();
+    
+    // Transactions as buyer
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionEntity> purchases = new ArrayList<>();
+    
+    // Transactions as seller
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionEntity> sales = new ArrayList<>();
+    
+    // Wishlist items
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SavedListingEntity> wishlist = new ArrayList<>();
+    
+    // Reports filed by this user
+    @OneToMany(mappedBy = "reportedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportEntity> reportsFiled = new ArrayList<>();
+    
+    // Reports received against this user (as seller)
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportEntity> reportsReceived = new ArrayList<>();
+    
     // Helper method to get full name
     public String getName() {
         return firstName + " " + lastName;
@@ -175,6 +213,78 @@ public class UserEntity {
 
     public void setAddresses(List<AddressEntity> addresses) {
         this.addresses = addresses;
+    }
+    
+    public List<ReviewEntity> getReviewsGiven() {
+        return reviewsGiven;
+    }
+
+    public void setReviewsGiven(List<ReviewEntity> reviewsGiven) {
+        this.reviewsGiven = reviewsGiven;
+    }
+
+    public List<ReviewEntity> getReviewsReceived() {
+        return reviewsReceived;
+    }
+
+    public void setReviewsReceived(List<ReviewEntity> reviewsReceived) {
+        this.reviewsReceived = reviewsReceived;
+    }
+
+    public List<ListingEntity> getListings() {
+        return listings;
+    }
+
+    public void setListings(List<ListingEntity> listings) {
+        this.listings = listings;
+    }
+
+    public List<OfferEntity> getOffersMade() {
+        return offersMade;
+    }
+
+    public void setOffersMade(List<OfferEntity> offersMade) {
+        this.offersMade = offersMade;
+    }
+
+    public List<TransactionEntity> getPurchases() {
+        return purchases;
+    }
+
+    public void setPurchases(List<TransactionEntity> purchases) {
+        this.purchases = purchases;
+    }
+
+    public List<TransactionEntity> getSales() {
+        return sales;
+    }
+
+    public void setSales(List<TransactionEntity> sales) {
+        this.sales = sales;
+    }
+
+    public List<SavedListingEntity> getWishlist() {
+        return wishlist;
+    }
+
+    public void setWishlist(List<SavedListingEntity> wishlist) {
+        this.wishlist = wishlist;
+    }
+
+    public List<ReportEntity> getReportsFiled() {
+        return reportsFiled;
+    }
+
+    public void setReportsFiled(List<ReportEntity> reportsFiled) {
+        this.reportsFiled = reportsFiled;
+    }
+
+    public List<ReportEntity> getReportsReceived() {
+        return reportsReceived;
+    }
+
+    public void setReportsReceived(List<ReportEntity> reportsReceived) {
+        this.reportsReceived = reportsReceived;
     }
     
     @Override

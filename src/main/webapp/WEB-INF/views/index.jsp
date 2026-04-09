@@ -517,12 +517,6 @@
                     <small>Flag a problem</small>
                 </a>
                 
-                <!-- Notifications (Placeholder) -->
-                <a href="#" class="quick-link-card">
-                    <i class="fas fa-bell"></i>
-                    <h6>Notifications</h6>
-                    <small>Updates</small>
-                </a>
             </div>
         </c:if>
         
@@ -614,30 +608,6 @@
                     </div>
                 </c:if>
             </c:forEach>
-        </div>
-        
-        <!-- Statistics Section -->
-        <div class="stats-section">
-            <div class="container">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <h3>${totalListings != null ? totalListings : '500+'}</h3>
-                        <p>Active Listings</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>${totalUsers != null ? totalUsers : '1000+'}</h3>
-                        <p>Happy Users</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>${totalCategories != null ? totalCategories : '50+'}</h3>
-                        <p>Categories</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>${totalTransactions != null ? totalTransactions : '300+'}</h3>
-                        <p>Transactions</p>
-                    </div>
-                </div>
-            </div>
         </div>
         
         <!-- Call to Action -->

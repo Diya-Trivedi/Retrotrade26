@@ -264,8 +264,7 @@
                                 <i class="fas fa-times-circle me-2"></i>Rejected
                             </a>
                         </li>
-                    </ul>
-                </li>
+                      </ul>
                 
                 <!-- Categories -->
                 <li class="${param.activePage == 'categories' ? 'active' : ''}">
@@ -299,19 +298,20 @@
                     			<i class="fas fa-flag me-2"></i> Reports
                 			</a>
             			</li>
-                
-                <!-- Reports -->
-                <li class="${param.activePage == 'reports' ? 'active' : ''}">
-                    <a href="${pageContext.request.contextPath}/#">
-                        <i class="fas fa-chart-bar"></i> Reports
-                    </a>
-                </li>
-                
-                <!-- Settings -->
-                <li class="${param.activePage == 'settings' ? 'active' : ''}">
-                    <a href="${pageContext.request.contextPath}/#">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
+            			<!-- Reviews -->
+						<li class="${param.activePage == 'reviews' ? 'active' : ''}">
+    						<a href="${pageContext.request.contextPath}/admin/reviews">
+        				<i class="fas fa-star"></i> Reviews
+    						</a>
+						</li>
+						
+						<!-- Wishlist Management -->
+						<li class="${param.activePage == 'wishlist' ? 'active' : ''}">
+    						<a href="${pageContext.request.contextPath}/admin/wishlist">
+        				<i class="fas fa-heart"></i> Wishlist
+    					  </a>
+					</li>
+                    </ul>
                 </li>
              <!-- existing items ... -->
     

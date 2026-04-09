@@ -664,36 +664,6 @@
                     <h6>Admin Profile</h6>
                     <small>Your account</small>
                 </a>
-                
-                <a href="#" class="action-card">
-                    <i class="fas fa-cog"></i>
-                    <h6>Settings</h6>
-                    <small>System settings</small>
-                </a>
-                
-                <a href="#" class="action-card">
-                    <i class="fas fa-file-alt"></i>
-                    <h6>Reports</h6>
-                    <small>Generate reports</small>
-                </a>
-                
-                <a href="#" class="action-card">
-                    <i class="fas fa-database"></i>
-                    <h6>Backup</h6>
-                    <small>System backup</small>
-                </a>
-                
-                <a href="#" class="action-card">
-                    <i class="fas fa-history"></i>
-                    <h6>Audit Logs</h6>
-                    <small>Activity tracking</small>
-                </a>
-                
-                <a href="#" class="action-card">
-                    <i class="fas fa-headset"></i>
-                    <h6>Support</h6>
-                    <small>Help & support</small>
-                </a>
             </div>
 
             <!-- Charts Section: Listing Distribution and Monthly Revenue -->

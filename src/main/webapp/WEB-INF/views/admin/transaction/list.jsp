@@ -35,7 +35,6 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-credit-card me-2"></i>Manage Transactions</h2>
-                <a href="${pageContext.request.contextPath}/admin/transactions/revenue" class="btn btn-success"><i class="fas fa-chart-line me-2"></i>Revenue Report</a>
             </div>
 
             <!-- Statistics Cards -->
